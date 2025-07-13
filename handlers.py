@@ -4,7 +4,6 @@ from aiogram.filters import CommandStart
 from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-import asyncio
 from generate import ai_generate
 import os
 from dotenv import load_dotenv

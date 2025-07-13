@@ -4,7 +4,7 @@ from aiogram.filters import CommandStart
 from aiogram.filters import Command
 from aiogram.fsm.state import State, StatesGroup
 from aiogram.fsm.context import FSMContext
-from generate import ai_generate
+import generate
 import os
 from dotenv import load_dotenv
 
@@ -36,6 +36,31 @@ async def generating(message: Message, state: FSMContext):
         return
     await state.set_state(Gen.wait)
     await message.answer("Мяу генерирую 🐾😊🐾")
-    response = await ai_generate(message.text)
+    response = await generate.ai_generate(message.text.removeprefix("/ask").strip())
     await message.answer(response, parse_mode='Markdown') #markdown
     await state.clear()
+
+@router.message(Command("context"))
+async def cmd_context(message: Message):
+    if message.from_user.id != RID and message.from_user.id != LID:
+        return
+    await message.answer(generate.user_context)
+
+@router.message(Command("default_context"))
+async def cmd_context(message: Message):
+    if message.from_user.id != RID and message.from_user.id != LID:
+        return
+    generate.make_default_context()
+    await message.answer(generate.user_context)
+
+@router.message(Command("edit_context"))
+async def cmd_context(message: Message):
+    if message.from_user.id != RID and message.from_user.id != LID:
+        return
+    success = generate.edit_context(message.text.removeprefix("/edit_context").strip())
+    if success:
+        await message.answer("✅ Контекст обновлён.")
+    else:
+        await message.answer("❌ Новый контекст слишком длинный.\n" + str(generate.lctx) + " > 256")
+
+    await message.answer(generate.user_context)
